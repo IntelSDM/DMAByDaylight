@@ -39,7 +39,7 @@ static ViewMatrix CreateMatrix(Vector3 rot, Vector3 origin) {
 	return matrix;
 }
 
-Vector3 Camera::WorldToScreen(MinimalViewInfo viewinfo, Vector3 world)
+Vector2 Camera::WorldToScreen(MinimalViewInfo viewinfo, Vector3 world)
 {
 	Vector3 Screenlocation(0, 0, 0);
 	Vector3 rot = Vector3(viewinfo.Rotation.Pitch, viewinfo.Rotation.Yaw, viewinfo.Rotation.Roll);
@@ -64,5 +64,5 @@ Vector3 Camera::WorldToScreen(MinimalViewInfo viewinfo, Vector3 world)
 	Screenlocation.y = centrey - vTransformed.y * (centrex / tanf(
 		viewinfo.FOV * FOV_DEG_TO_RAD)) / vTransformed.z;
 
-	return Screenlocation;
+	return Vector2(Screenlocation.x, Screenlocation.y);
 }

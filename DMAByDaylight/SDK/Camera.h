@@ -4,5 +4,5 @@
 class Camera
 {
 public:
-	static Vector3 WorldToScreen(MinimalViewInfo viewinfo, Vector3 world);
+	static Vector2 WorldToScreen(MinimalViewInfo viewinfo, Vector3 world);
 };

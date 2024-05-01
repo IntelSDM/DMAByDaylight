@@ -119,8 +119,11 @@ void RenderFrame()
 		{
 			if(entity->GetPosition() == Vector3(0,0,0))
 				continue;
-			Vector3 screenpos = Camera::WorldToScreen(EngineInstance->GetCameraCache().POV, entity->GetPosition());
-			DrawText(screenpos.x, screenpos.y, entity->GetName(), "Verdana", 12, Colour(255, 0, 0, 255), CentreCentre);
+			Vector2 screenpos = Camera::WorldToScreen(EngineInstance->GetCameraCache().POV, entity->GetPosition());
+			Vector3 campos = Vector3(EngineInstance->GetCameraCache().POV.Location.X, EngineInstance->GetCameraCache().POV.Location.Y, EngineInstance->GetCameraCache().POV.Location.Z);
+			int distance = (Vector3::Distance(campos, entity->GetPosition()) / 39.62f) - 6;
+			std::wstring wdistance = L"[" + std::to_wstring(distance) + L"m]";
+			DrawText(screenpos.x, screenpos.y, entity->GetName() + wdistance, "Verdana", 12, Colour(255, 0, 0, 255), CentreCentre);
 		}
 	}
 	Render();
