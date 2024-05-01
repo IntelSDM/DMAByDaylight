@@ -12,17 +12,17 @@ class ActorEntity
 {
 private:
 	uint64_t Class = 0;
-	std::string FName;
 	EPlayerRole PlayerRole;
-	uint64_t PlayerState = 0x2C0;
+	uint64_t PlayerState = 0x2C0; // Pawn -> PlayerState
 	uint64_t AcknowledgedPawn = 0x2f8;
-	uint64_t RootComponent = 0x1A8;
-	uint64_t RelativeLocation = 0x140;
+	uint64_t RootComponent = 0x1A8; // Actor -> RootComponent
+	uint64_t RelativeLocation = 0x140; // SceneComponent -> RelativeLocation
 	uint64_t GameRole = 0x3fa; // DBDPlayerState -> GameRole
-	
+	std::string Name = "Entity";
 
 public:
 	ActorEntity(uint64_t address);
 	uint64_t GetClass();
-
+	EPlayerRole GetPlayerRole();
+	std::string GetName();
 };

@@ -176,11 +176,13 @@
     <ClCompile Include="Misc\Input.cpp" />
     <ClCompile Include="Misc\Pch\Pch.cpp" />
     <ClCompile Include="Misc\Vector.cpp" />
+    <ClCompile Include="SDK\Camera.cpp" />
     <ClCompile Include="SDK\Engine.cpp" />
     <ClCompile Include="SDK\ActorEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config\ConfigInstance.h" />
+    <ClInclude Include="Config\Overlay.h" />
     <ClInclude Include="Config\PlayerConfig.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Graphics\Drawing.h" />
@@ -212,6 +214,7 @@
     <ClInclude Include="Misc\Input.h" />
     <ClInclude Include="Misc\Pch\Pch.h" />
     <ClInclude Include="Misc\Vector.h" />
+    <ClInclude Include="SDK\Camera.h" />
     <ClInclude Include="SDK\Engine.h" />
     <ClInclude Include="SDK\ActorEntity.h" />
     <ClInclude Include="Security\XorStr.h" />

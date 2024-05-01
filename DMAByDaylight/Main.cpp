@@ -5,7 +5,7 @@
 #include "Init.h"
 #include "GUI.h"
 #include "Engine.h"
-uint64_t fname = 0;
+std::shared_ptr<Engine> EngineInstance;
 
 
 void main()
@@ -30,8 +30,8 @@ void main()
 
 	uint64_t base = TargetProcess.GetBaseAddress(gamename);
 	uint64_t size = TargetProcess.GetBaseSize(gamename);
-	std::shared_ptr<Engine> engine = std::make_shared<Engine>(gamename);
-	engine->Cache();
+	EngineInstance = std::make_shared<Engine>(gamename);
+	EngineInstance->Cache();
 
 	
 
