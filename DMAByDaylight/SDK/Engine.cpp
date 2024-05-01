@@ -6,7 +6,30 @@ Engine::Engine(std::string name)
 {
 	GameName = name;
 	GWorld = TargetProcess.Read<uint64_t>(TargetProcess.GetBaseAddress(GameName) + GWorld);
+	printf("GWorld: %p\n", GWorld);
 	PersistentLevel = TargetProcess.Read<uint64_t>(GWorld + PersistentLevel);
+	printf("PersistentLevel: %p\n", PersistentLevel);
+	OwningGameInstance = TargetProcess.Read<uint64_t>(GWorld + OwningGameInstance);
+	printf("OwningGameInstance: %p\n", OwningGameInstance);
+	LocalPlayers = TargetProcess.Read<uint64_t>(OwningGameInstance + LocalPlayers);
+	printf("LocalPlayers: %p\n", LocalPlayers);
+	LocalPlayers = TargetProcess.Read<uint64_t>(LocalPlayers);
+	printf("LocalPlayers: %p\n", LocalPlayers);
+	PlayerController = TargetProcess.Read<uint64_t>(LocalPlayers + PlayerController);
+	printf("PlayerController: %p\n", PlayerController);
+	AcknowledgedPawn = TargetProcess.Read<uint64_t>(PlayerController + AcknowledgedPawn);
+	printf("AcknowledgedPawn: %p\n", AcknowledgedPawn);
+	CameraManager = TargetProcess.Read<uint64_t>(PlayerController + CameraManager);
+	printf("CameraManager: %p\n", CameraManager);
+	CameraCacheEntry = TargetProcess.Read<FCameraCacheEntry>(CameraManager + CameraCachePrivate);
+	printf("CameraCacheEntry: %p\n", CameraCacheEntry);
+
+	uint64_t gamestate = TargetProcess.Read<uint64_t>(GWorld + 0x130);
+	printf("GameState: %p\n", gamestate);
+	uint64_t playerarray = TargetProcess.Read<uint64_t>(gamestate + 0x248);
+	printf("PlayerArray: %p\n", playerarray);
+	uint32_t playerarraysize = TargetProcess.Read<uint64_t>(gamestate + 0x248 + 0x8);
+	printf("PlayerArraySize: %d\n", playerarraysize);
 
 }
 std::string Engine::GetNameById(uint32_t actorid)
@@ -30,8 +53,8 @@ std::string Engine::GetNameById(uint32_t actorid)
 
 void Engine::Cache()
 {
-	OwningActor = TargetProcess.Read<uint64_t>(PersistentLevel + OwningActor);
-	MaxPacket = TargetProcess.Read<uint32_t>(PersistentLevel + MaxPacket);
+	OwningActor = TargetProcess.Read<uint64_t>(PersistentLevel + OwningActorOffset);
+	MaxPacket = TargetProcess.Read<uint32_t>(PersistentLevel + MaxPacketOffset);
 
 	printf("Actor Array: %p\n", OwningActor);
 	printf("Actor Array Size: %d\n", MaxPacket);
@@ -41,31 +64,9 @@ void Engine::Cache()
 		uintptr_t actor = TargetProcess.Read<uintptr_t>(OwningActor + i * 0x8);
 		if (!actor)
 			continue;
-		uint32_t objectId = TargetProcess.Read<int>(actor + 0x18);
-		std::string name = GetNameById(objectId);
+			std::shared_ptr<ActorEntity> entity = std::make_shared<ActorEntity>(actor);
+		//	Actors.push_back(entity);
 		
-		if (name.find("BP_CamperMale") != std::string::npos)
-		{
-			printf("Actor: %p, ID: %d, Name: %s\n", actor, objectId, name.c_str());
-			std::shared_ptr<ActorEntity> entity = std::make_shared<ActorEntity>(actor, name,Survivor);
-			Actors.push_back(entity);
-			continue;
-		}
-		if (name.find("BP_CamperFemale") != std::string::npos)
-		{
-			printf("Actor: %p, ID: %d, Name: %s\n", actor, objectId, name.c_str());
-			std::shared_ptr<ActorEntity> entity = std::make_shared<ActorEntity>(actor, name, Survivor);
-			Actors.push_back(entity);
-			continue;
-		}
-		if (name.find("BP_Slasher") != std::string::npos)
-		{
-			printf("Actor: %p, ID: %d, Name: %s\n", actor, objectId, name.c_str());
-			std::shared_ptr<ActorEntity> entity = std::make_shared<ActorEntity>(actor, name, Killer);
-			Actors.push_back(entity);
-			continue;
-		}
-
 		
 	}
 
