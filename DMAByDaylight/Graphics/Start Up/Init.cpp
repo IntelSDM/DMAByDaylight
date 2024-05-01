@@ -3,6 +3,7 @@
 #include "drawing.h"
 #include "GUI.h"
 #include "Globals.h"
+#include "Camera.h"
 ID2D1Factory* Factory;
 IDWriteFactory* FontFactory;
 ID2D1HwndRenderTarget* RenderTarget;
@@ -27,8 +28,6 @@ void InitD2D(HWND hWnd)
 	RenderTarget->CreateSolidColorBrush(D2D1::ColorF(0, 0, 0, 0), &Brush); // create global brush
 	RenderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE); // set aa mode
 }
-std::shared_ptr<CheatFunction> UpdateViewMatrix = std::make_shared<CheatFunction>(5, []() {
-	});
 
 void CleanD2D()
 {
@@ -87,18 +86,43 @@ void InitialiseClasses()
 }
 
 std::shared_ptr<CheatFunction> Cache = std::make_shared<CheatFunction>(1000, [] {
-	
+	if (!EngineInstance)
+		return;
+	EngineInstance->Cache();
+	});
+std::shared_ptr<CheatFunction> UpdateViewMatrix = std::make_shared<CheatFunction>(5, [] {
+	if (!EngineInstance)
+		return;
+	auto handle = TargetProcess.CreateScatterHandle();
+	EngineInstance->RefreshViewMatrix(handle);
+	TargetProcess.ExecuteReadScatter(handle);
+	TargetProcess.CloseScatterHandle(handle);
 
 	});
-
-
+std::shared_ptr<CheatFunction> UpdatePlayers = std::make_shared<CheatFunction>(10, [] {
+	if (!EngineInstance)
+		return;
+	EngineInstance->UpdatePlayers();
+	});
 void RenderFrame()
 {
+	Cache->Execute();
+	UpdateViewMatrix->Execute();
+	UpdatePlayers->Execute();
 
-	
 	RenderTarget->BeginDraw();
 	RenderTarget->Clear(Colour(0, 0, 0, 255)); // clear over the last buffer
 	RenderTarget->SetTransform(D2D1::Matrix3x2F::Identity()); // set new transform
+	if (EngineInstance)
+	{
+		for (auto entity : EngineInstance->GetActors())
+		{
+			if(entity->GetPosition() == Vector3(0,0,0))
+				continue;
+			Vector3 screenpos = Camera::WorldToScreen(EngineInstance->GetCameraCache().POV, entity->GetPosition());
+			DrawText(screenpos.x, screenpos.y, entity->GetName(), "Verdana", 12, Colour(255, 0, 0, 255), CentreCentre);
+		}
+	}
 	Render();
 	RenderTarget->EndDraw();
 }

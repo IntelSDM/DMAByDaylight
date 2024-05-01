@@ -2,40 +2,61 @@
 #include "ActorEntity.h"
 #include "Camera.h"
 #include "Globals.h"
-ActorEntity::ActorEntity(uint64_t address)
+ActorEntity::ActorEntity(uint64_t address,VMMDLL_SCATTER_HANDLE handle)
 {
 	Class = address;
+	if(!address)
+		return;
+	 TargetProcess.AddScatterReadRequest(handle,Class + PlayerState,reinterpret_cast<void*>(&PlayerState), sizeof(uint64_t));
+	 TargetProcess.AddScatterReadRequest(handle,Class + AcknowledgedPawn, reinterpret_cast<void*>(&AcknowledgedPawn),sizeof(uint64_t));
+	 TargetProcess.AddScatterReadRequest(handle, Class + RootComponent, reinterpret_cast<void*>(&RootComponent),sizeof(uint64_t));
 
-	PlayerState = TargetProcess.Read<uint64_t>(Class + PlayerState);
+	
+}
+
+void ActorEntity::SetUp1(VMMDLL_SCATTER_HANDLE handle)
+{
+	if (!Class)
+		return;
+	if (!RootComponent)
+		return;
 	if (!PlayerState)
 		return;
+	if (AcknowledgedPawn) // players aren't pawns
+		return;
 
-	PlayerRole = TargetProcess.Read<EPlayerRole>(PlayerState + GameRole);
+	TargetProcess.AddScatterReadRequest(handle, PlayerState + GameRole, reinterpret_cast<void*>(&PlayerRole), sizeof(EPlayerRole));
+	
+}
 
+void ActorEntity::SetUp2()
+{
+
+	if (!Class)
+		return;
+	if (!RootComponent)
+		return;
+	if (!PlayerState)
+		return;
+	if (AcknowledgedPawn) // players aren't pawns
+		return;
+
+	// by this point we should only have our surviors and killers
 	if (PlayerRole != EPlayerRole::EPlayerRole__VE_Camper && PlayerRole != EPlayerRole::EPlayerRole__VE_Slasher)
 		return;
 	printf("PlayerRole: %d\n", PlayerRole);
-	if(PlayerRole == EPlayerRole::EPlayerRole__VE_Camper)
+	if (PlayerRole == EPlayerRole::EPlayerRole__VE_Camper)
 	{
-		Name = "Survivor";
+		Name = L"Survivor";
 	}
 	else
 	{
-		Name = "Killer";
+		Name = L"Killer";
 	}
 
-	AcknowledgedPawn = TargetProcess.Read<uint64_t>(Class + AcknowledgedPawn);
-	if(AcknowledgedPawn) // players aren't pawns
-		return;
-	RootComponent = TargetProcess.Read<uint64_t>(Class + RootComponent);
-	if (!RootComponent)
-		return;
-	UEVector location = TargetProcess.Read<UEVector>(RootComponent + RelativeLocation);
-	Vector3 pos = Vector3(location.X, location.Y, location.Z);
 
-	printf("Actor: %p,Location: %f %f %f\n", Class,location.X, location.Y, location.Z);
-	Vector3 screen = Camera::WorldToScreen(EngineInstance->GetCameraCache().POV, pos);
-	printf("Screen: %f %f %f\n", screen.x, screen.y, screen.z);
+	UEPosition = TargetProcess.Read<UEVector>(RootComponent + RelativeLocation);
+	Position = Vector3(UEPosition.X, UEPosition.Y, UEPosition.Z);
 }
 
 EPlayerRole ActorEntity::GetPlayerRole()
@@ -48,7 +69,28 @@ uint64_t ActorEntity::GetClass()
 	return Class;
 }
 
-std::string ActorEntity::GetName()
+std::wstring ActorEntity::GetName()
 {
 	return Name;
+}
+
+Vector3 ActorEntity::GetPosition()
+{
+	Position = Vector3(UEPosition.X, UEPosition.Y, UEPosition.Z);
+	return Position;
+}
+
+void ActorEntity::UpdatePosition(VMMDLL_SCATTER_HANDLE handle)
+{
+	if (!Class)
+		return;
+	if (!RootComponent)
+		return;
+	if (!PlayerState)
+		return;
+	if (AcknowledgedPawn) // players aren't pawns
+		return;
+	if (PlayerRole != EPlayerRole::EPlayerRole__VE_Camper && PlayerRole != EPlayerRole::EPlayerRole__VE_Slasher)
+		return;
+	TargetProcess.AddScatterReadRequest(handle, RootComponent + RelativeLocation, reinterpret_cast<void*>(&UEPosition), sizeof(UEVector));
 }

@@ -217,6 +217,7 @@
     <ClInclude Include="SDK\Camera.h" />
     <ClInclude Include="SDK\Engine.h" />
     <ClInclude Include="SDK\ActorEntity.h" />
+    <ClInclude Include="SDK\EngineStructs.h" />
     <ClInclude Include="Security\XorStr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

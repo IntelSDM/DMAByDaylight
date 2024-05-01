@@ -43,22 +43,51 @@ void Engine::Cache()
 	{
 		entitylist[i] = object_raw_ptr[i];
 	}
-
+	std::list<std::shared_ptr<ActorEntity>> actors;
+	auto handle = TargetProcess.CreateScatterHandle();
 	for (uint64_t address : entitylist)
 	{
 		uintptr_t actor = address;
 		if (!actor)
 			continue;
-			std::shared_ptr<ActorEntity> entity = std::make_shared<ActorEntity>(actor);
-			if (entity->GetPlayerRole() != EPlayerRole::EPlayerRole__VE_Slasher && entity->GetPlayerRole() != EPlayerRole::EPlayerRole__VE_Camper)
-				continue;
-			Actors.push_back(entity);
 		
+			std::shared_ptr<ActorEntity> entity = std::make_shared<ActorEntity>(actor, handle);
+			actors.push_back(entity);
 		
 	}
+	TargetProcess.ExecuteReadScatter(handle);
+	TargetProcess.CloseScatterHandle(handle);
 
+
+	handle = TargetProcess.CreateScatterHandle();
+	for (std::shared_ptr<ActorEntity> entity : actors)
+	{
+		entity->SetUp1(handle);
+	}
+	TargetProcess.ExecuteReadScatter(handle);
+	TargetProcess.CloseScatterHandle(handle);
+	std::vector<std::shared_ptr<ActorEntity>> playerlist;
+	for (std::shared_ptr<ActorEntity> entity : actors)
+	{
+		entity->SetUp2();
+		if (entity->GetPlayerRole() != EPlayerRole::EPlayerRole__VE_Slasher && entity->GetPlayerRole() != EPlayerRole::EPlayerRole__VE_Camper)
+			continue;
+		if(entity->GetPosition() == Vector3::Zero())
+						continue;
+		playerlist.push_back(entity);
+	}
+	Actors = playerlist;
 }
-
+void Engine::UpdatePlayers()
+{
+	auto handle = TargetProcess.CreateScatterHandle();
+	for (std::shared_ptr<ActorEntity> entity : Actors)
+	{
+		entity->UpdatePosition(handle);
+	}
+	TargetProcess.ExecuteReadScatter(handle);
+	TargetProcess.CloseScatterHandle(handle);
+}
 void Engine::RefreshViewMatrix(VMMDLL_SCATTER_HANDLE handle)
 {
 	TargetProcess.AddScatterReadRequest(handle, CameraManager + CameraCachePrivateOffset,reinterpret_cast<void*>(&CameraEntry),sizeof(CameraCacheEntry));
@@ -67,4 +96,9 @@ void Engine::RefreshViewMatrix(VMMDLL_SCATTER_HANDLE handle)
 CameraCacheEntry Engine::GetCameraCache()
 {
 	return CameraEntry;
+}
+
+std::vector<std::shared_ptr<ActorEntity>> Engine::GetActors()
+{
+	return Actors;
 }
