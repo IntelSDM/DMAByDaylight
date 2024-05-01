@@ -20,13 +20,10 @@ void ActorEntity::SetUp1(VMMDLL_SCATTER_HANDLE handle)
 		return;
 	if (!RootComponent)
 		return;
-	if (!PlayerState)
-		return;
-	if (AcknowledgedPawn) // players aren't pawns
-		return;
-
-	TargetProcess.AddScatterReadRequest(handle, PlayerState + GameRole, reinterpret_cast<void*>(&PlayerRole), sizeof(EPlayerRole));
-	
+	if (!AcknowledgedPawn && PlayerState) // players aren't pawns
+	{
+		TargetProcess.AddScatterReadRequest(handle, PlayerState + GameRole, reinterpret_cast<void*>(&PlayerRole), sizeof(EPlayerRole));
+	}
 }
 
 void ActorEntity::SetUp2()
@@ -36,27 +33,24 @@ void ActorEntity::SetUp2()
 		return;
 	if (!RootComponent)
 		return;
-	if (!PlayerState)
-		return;
-	if (AcknowledgedPawn) // players aren't pawns
-		return;
-
-	// by this point we should only have our surviors and killers
-	if (PlayerRole != EPlayerRole::EPlayerRole__VE_Camper && PlayerRole != EPlayerRole::EPlayerRole__VE_Slasher)
-		return;
-	printf("PlayerRole: %d\n", PlayerRole);
-	if (PlayerRole == EPlayerRole::EPlayerRole__VE_Camper)
+	if (!AcknowledgedPawn && PlayerState) // players aren't pawns
 	{
-		Name = L"Survivor";
-	}
-	else
-	{
-		Name = L"Killer";
+		// by this point we should only have our surviors and killers
+		if (PlayerRole != EPlayerRole::EPlayerRole__VE_Camper && PlayerRole != EPlayerRole::EPlayerRole__VE_Slasher)
+			return;
+		if (PlayerRole == EPlayerRole::EPlayerRole__VE_Camper)
+		{
+			Name = LIT(L"Survivor");
+		}
+		else
+		{
+			Name = LIT(L"Killer");
+		}
+
+		UEPosition = TargetProcess.Read<UEVector>(RootComponent + RelativeLocation);
+		Position = Vector3(UEPosition.X, UEPosition.Y, UEPosition.Z);
 	}
 
-
-	UEPosition = TargetProcess.Read<UEVector>(RootComponent + RelativeLocation);
-	Position = Vector3(UEPosition.X, UEPosition.Y, UEPosition.Z);
 }
 
 EPlayerRole ActorEntity::GetPlayerRole()

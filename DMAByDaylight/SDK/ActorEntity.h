@@ -19,7 +19,7 @@ private:
 	uint64_t RootComponent = 0x1A8; // Actor -> RootComponent
 	uint64_t RelativeLocation = 0x140; // SceneComponent -> RelativeLocation
 	uint64_t GameRole = 0x3fa; // DBDPlayerState -> GameRole
-	std::wstring Name = L"Entity";
+	std::wstring Name = LIT(L"Entity");
 	UEVector UEPosition;
 	Vector3 Position;
 public:

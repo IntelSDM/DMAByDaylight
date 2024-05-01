@@ -85,9 +85,14 @@ void InitialiseClasses()
 	
 }
 
-std::shared_ptr<CheatFunction> Cache = std::make_shared<CheatFunction>(1000, [] {
+std::shared_ptr<CheatFunction> Cache = std::make_shared<CheatFunction>(3000, [] {
 	if (!EngineInstance)
 		return;
+	if (!EngineInstance->GetActorSize() <= 0 || EngineInstance->GetActorSize() >= 2000)
+	{
+		std::string name = EngineInstance->GetGameName();
+		EngineInstance = std::make_shared<Engine>(name);
+	}
 	EngineInstance->Cache();
 	});
 std::shared_ptr<CheatFunction> UpdateViewMatrix = std::make_shared<CheatFunction>(5, [] {
@@ -121,8 +126,10 @@ void RenderFrame()
 				continue;
 			Vector2 screenpos = Camera::WorldToScreen(EngineInstance->GetCameraCache().POV, entity->GetPosition());
 			Vector3 campos = Vector3(EngineInstance->GetCameraCache().POV.Location.X, EngineInstance->GetCameraCache().POV.Location.Y, EngineInstance->GetCameraCache().POV.Location.Z);
-			int distance = (Vector3::Distance(campos, entity->GetPosition()) / 39.62f) - 6;
-			std::wstring wdistance = L"[" + std::to_wstring(distance) + L"m]";
+			float distance = (Vector3::Distance(campos, entity->GetPosition()) / 39.62f) - 6;
+			if(distance <0)
+				continue;
+			std::wstring wdistance = L"[" + std::to_wstring((int)distance) + L"m]";
 			DrawText(screenpos.x, screenpos.y, entity->GetName() + wdistance, "Verdana", 12, Colour(255, 0, 0, 255), CentreCentre);
 		}
 	}

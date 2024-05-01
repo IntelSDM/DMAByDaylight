@@ -35,6 +35,7 @@ void Engine::Cache()
 
 	printf("Actor Array: %p\n", OwningActor);
 	printf("Actor Array Size: %d\n", MaxPacket);
+
 	std::vector<uint64_t> entitylist;
 	entitylist.resize(MaxPacket);
 	std::unique_ptr<uint64_t[]> object_raw_ptr = std::make_unique<uint64_t[]>(MaxPacket);
@@ -70,7 +71,7 @@ void Engine::Cache()
 	for (std::shared_ptr<ActorEntity> entity : actors)
 	{
 		entity->SetUp2();
-		if (entity->GetPlayerRole() != EPlayerRole::EPlayerRole__VE_Slasher && entity->GetPlayerRole() != EPlayerRole::EPlayerRole__VE_Camper)
+		if (entity->GetName() == LIT(L"Entity"))
 			continue;
 		if(entity->GetPosition() == Vector3::Zero())
 						continue;
@@ -101,4 +102,14 @@ CameraCacheEntry Engine::GetCameraCache()
 std::vector<std::shared_ptr<ActorEntity>> Engine::GetActors()
 {
 	return Actors;
+}
+
+uint32_t Engine::GetActorSize()
+{
+	return MaxPacket;
+}
+
+std::string Engine::GetGameName()
+{
+	return GameName;
 }

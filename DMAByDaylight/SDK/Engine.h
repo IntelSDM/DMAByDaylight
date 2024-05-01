@@ -31,4 +31,7 @@ public:
 	std::vector<std::shared_ptr<ActorEntity>> GetActors();
 	CameraCacheEntry GetCameraCache();
 	void RefreshViewMatrix(VMMDLL_SCATTER_HANDLE handle);
+	uint32_t GetActorSize();
+	std::string GetGameName();
+
 };
