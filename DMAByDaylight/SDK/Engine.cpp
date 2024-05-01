@@ -1,11 +1,11 @@
 #include "Pch.h"
 #include "Engine.h"
 #include "ActorEntity.h"
+#include "Globals.h"
 
-Engine::Engine(std::string name)
+Engine::Engine()
 {
-	GameName = name;
-	GWorld = TargetProcess.Read<uint64_t>(TargetProcess.GetBaseAddress(GameName) + GWorld);
+	GWorld = TargetProcess.Read<uint64_t>(TargetProcess.GetBaseAddress(ProcessName) + GWorld);
 	printf("GWorld: %p\n", GWorld);
 	PersistentLevel = TargetProcess.Read<uint64_t>(GWorld + PersistentLevel);
 	printf("PersistentLevel: %p\n", PersistentLevel);
@@ -107,9 +107,4 @@ std::vector<std::shared_ptr<ActorEntity>> Engine::GetActors()
 uint32_t Engine::GetActorSize()
 {
 	return MaxPacket;
-}
-
-std::string Engine::GetGameName()
-{
-	return GameName;
 }

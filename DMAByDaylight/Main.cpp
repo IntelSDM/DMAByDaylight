@@ -6,19 +6,19 @@
 #include "GUI.h"
 #include "Engine.h"
 std::shared_ptr<Engine> EngineInstance;
-
+std::string ProcessName;
 
 void main()
 {
 	bool gamefound = true;
-	std::string gamename = "DeadByDaylight-Win64-Shipping.exe";
+	ProcessName = "DeadByDaylight-Win64-Shipping.exe";
 	if (TargetProcess.Init("DeadByDaylight-Win64-Shipping.exe"))
 	{
-		gamename = "DeadByDaylight-Win64-Shipping.exe";
+		ProcessName = "DeadByDaylight-Win64-Shipping.exe";
 	}
 	else if (TargetProcess.Init("DeadByDaylight-EGS-Shipping.exe"))
 	{
-		gamename = "DeadByDaylight-EGS-Shipping.exe";
+		ProcessName = "DeadByDaylight-EGS-Shipping.exe";
 
 	}
 	else
@@ -28,9 +28,9 @@ void main()
 	}
 
 
-	uint64_t base = TargetProcess.GetBaseAddress(gamename);
-	uint64_t size = TargetProcess.GetBaseSize(gamename);
-	EngineInstance = std::make_shared<Engine>(gamename);
+	uint64_t base = TargetProcess.GetBaseAddress(ProcessName);
+	uint64_t size = TargetProcess.GetBaseSize(ProcessName);
+	EngineInstance = std::make_shared<Engine>();
 	EngineInstance->Cache();
 
 	

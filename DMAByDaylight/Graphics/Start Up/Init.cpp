@@ -4,6 +4,7 @@
 #include "GUI.h"
 #include "Globals.h"
 #include "Camera.h"
+#include "PlayerEsp.h"
 ID2D1Factory* Factory;
 IDWriteFactory* FontFactory;
 ID2D1HwndRenderTarget* RenderTarget;
@@ -87,11 +88,13 @@ void InitialiseClasses()
 
 std::shared_ptr<CheatFunction> Cache = std::make_shared<CheatFunction>(3000, [] {
 	if (!EngineInstance)
+	{
+		EngineInstance = std::make_shared<Engine>();
 		return;
+	}
 	if (!EngineInstance->GetActorSize() <= 0 || EngineInstance->GetActorSize() >= 2000)
 	{
-		std::string name = EngineInstance->GetGameName();
-		EngineInstance = std::make_shared<Engine>(name);
+		EngineInstance = std::make_shared<Engine>();
 	}
 	EngineInstance->Cache();
 	});
@@ -104,35 +107,16 @@ std::shared_ptr<CheatFunction> UpdateViewMatrix = std::make_shared<CheatFunction
 	TargetProcess.CloseScatterHandle(handle);
 
 	});
-std::shared_ptr<CheatFunction> UpdatePlayers = std::make_shared<CheatFunction>(10, [] {
-	if (!EngineInstance)
-		return;
-	EngineInstance->UpdatePlayers();
-	});
+
 void RenderFrame()
 {
 	Cache->Execute();
 	UpdateViewMatrix->Execute();
 	UpdatePlayers->Execute();
-
 	RenderTarget->BeginDraw();
 	RenderTarget->Clear(Colour(0, 0, 0, 255)); // clear over the last buffer
 	RenderTarget->SetTransform(D2D1::Matrix3x2F::Identity()); // set new transform
-	if (EngineInstance)
-	{
-		for (auto entity : EngineInstance->GetActors())
-		{
-			if(entity->GetPosition() == Vector3(0,0,0))
-				continue;
-			Vector2 screenpos = Camera::WorldToScreen(EngineInstance->GetCameraCache().POV, entity->GetPosition());
-			Vector3 campos = Vector3(EngineInstance->GetCameraCache().POV.Location.X, EngineInstance->GetCameraCache().POV.Location.Y, EngineInstance->GetCameraCache().POV.Location.Z);
-			float distance = (Vector3::Distance(campos, entity->GetPosition()) / 39.62f) - 6;
-			if(distance <0)
-				continue;
-			std::wstring wdistance = L"[" + std::to_wstring((int)distance) + L"m]";
-			DrawText(screenpos.x, screenpos.y, entity->GetName() + wdistance, "Verdana", 12, Colour(255, 0, 0, 255), CentreCentre);
-		}
-	}
+	DrawPlayerEsp();
 	Render();
 	RenderTarget->EndDraw();
 }
