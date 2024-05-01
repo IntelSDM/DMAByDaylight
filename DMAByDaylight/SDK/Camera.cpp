@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "ConfigInstance.h"
+#include "ConfigUtilities.h"
 #include "Camera.h"
 
 static ViewMatrix CreateMatrix(Vector3 rot, Vector3 origin) {
@@ -57,8 +57,8 @@ Vector2 Camera::WorldToScreen(MinimalViewInfo viewinfo, Vector3 world)
 		vTransformed.z = 1.f;
 
 	const float FOV_DEG_TO_RAD = static_cast<float>(3.14159265358979323846) / 360.f;
-	int centrex = ConfigInstance.Overlay.OverrideResolution ? ConfigInstance.Overlay.Width /2 : GetSystemMetrics(SM_CXSCREEN) / 2;
-	int centrey = ConfigInstance.Overlay.OverrideResolution ? ConfigInstance.Overlay.Height / 2 : GetSystemMetrics(SM_CYSCREEN) / 2;
+	int centrex = Configs.Overlay.OverrideResolution ? Configs.Overlay.Width /2 : GetSystemMetrics(SM_CXSCREEN) / 2;
+	int centrey = Configs.Overlay.OverrideResolution ? Configs.Overlay.Height / 2 : GetSystemMetrics(SM_CYSCREEN) / 2;
 	Screenlocation.x = centrex + vTransformed.x * (centrex / tanf(
 		viewinfo.FOV * FOV_DEG_TO_RAD)) / vTransformed.z;
 	Screenlocation.y = centrey - vTransformed.y * (centrex / tanf(
