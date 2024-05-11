@@ -26,7 +26,7 @@ void main()
 		printf("Failed to find game\n");
 		return;
 	}
-
+	TargetProcess.FixCr3();
 
 	uint64_t base = TargetProcess.GetBaseAddress(ProcessName);
 	uint64_t size = TargetProcess.GetBaseSize(ProcessName);
